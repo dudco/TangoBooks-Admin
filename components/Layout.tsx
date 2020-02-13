@@ -54,7 +54,7 @@ const Layout: NextPage<LayoutProps> = (props: LayoutProps) => {
 };
 
 export const withLayout = (Page, { title, showBanner = true }) => {
-  return class extends Component<{ pageProps: any }> {
+  return class extends Component<{ pageProps: any; data: any; getData: any }> {
     static async getInitialProps(ctx) {
       let pageProps = {};
 
@@ -68,7 +68,7 @@ export const withLayout = (Page, { title, showBanner = true }) => {
     render() {
       return (
         <Layout title={title} subTitle={""} showBanner={showBanner}>
-          <Page {...this.props.pageProps} />
+          <Page data={this.props.data} getData={this.props.getData} {...this.props.pageProps} />
         </Layout>
       );
     }

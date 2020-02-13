@@ -7,6 +7,10 @@ import { createGlobalStyle } from "styled-components";
 import theme from "../src/theme";
 import { AuthProvider } from "../utils/user-context";
 import { LoadingProvider } from "../utils/loading-context";
+import NProgress from "nprogress";
+import Router from "next/router";
+import moment from "moment";
+
 const GlobalStyle = createGlobalStyle`
   :root {
     height: 100vh;
@@ -34,26 +38,34 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-export default class MyApp extends App {
-  componentDidMount() {}
+moment.locale("ko");
 
+Router.events.on("routeChangeStart", url => NProgress.start());
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
+
+// cra의 app.js
+// 페이지들이 변화할 때 layout을 유지
+// 페이지를 navigating 할 때 state(상태) 유지
+// componentDidCatch로 고객들의 에러 관리
+// 페이지들에 추가데이터 사용가능 (예를 들어 전달되는 GraphQL queries)
+
+export default class MyApp extends App {
   render() {
     const { Component, pageProps } = this.props;
 
     return (
       <LoadingProvider>
         <AuthProvider>
-          <Container>
-            <Head>
-              <title>My page</title>
-            </Head>
-            <ThemeProvider theme={theme}>
-              <GlobalStyle />
-              <CssBaseline />
-              <Component {...pageProps} />
-              <div id="modal"></div>
-            </ThemeProvider>
-          </Container>
+          <Head>
+            <title>My page</title>
+          </Head>
+          <ThemeProvider theme={theme}>
+            <GlobalStyle />
+            <CssBaseline />
+            <Component {...pageProps} />
+            <div id="modal"></div>
+          </ThemeProvider>
         </AuthProvider>
       </LoadingProvider>
     );

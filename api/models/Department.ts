@@ -1,6 +1,7 @@
 import EmployeeModel from "./Employee";
+import UserModel from "./User";
 
-export default interface DepartmentModel {
+export default interface DepartmentModel extends UserModel {
   _id: string;
   employees: EmployeeModel[];
 

@@ -1,14 +1,9 @@
-import Document, {
-  DocumentContext,
-  Html,
-  Head,
-  Main,
-  NextScript
-} from "next/document";
+import Document, { DocumentContext, Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheet as StyledServerStyleSheet } from "styled-components";
 import { ServerStyleSheets as MaterialServerStyleSheet } from "@material-ui/styles";
 import flush from "styled-jsx/server";
 
+// cra index.html
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
     const sheet = new StyledServerStyleSheet();
