@@ -52,6 +52,14 @@ const AdminDepartment = props => {
       setDepartments((await getDepartments()).data);
     }
   };
+
+  const onClickDel = id => async e => {
+    const res = await DepartmentService.delete(id);
+    if (res.status === 200) {
+      setDepartments((await getDepartments()).data);
+    }
+  };
+
   return (
     <div>
       <ToolWrapper>
@@ -82,7 +90,9 @@ const AdminDepartment = props => {
                 <TableCell>{department.user_pw}</TableCell>
                 <TableCell>{department.phone}</TableCell>
                 <TableCell>
-                  <Button variant="contained">삭제</Button>
+                  <Button variant="contained" onClick={onClickDel(department._id)}>
+                    삭제
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
