@@ -79,7 +79,7 @@ export const DepartmentMenu = () => {
         <MenuItem link="/department/employee" title="공공근로자 관리" />
         <MenuItem link="/department/attendance" title="출근부" />
         <MenuItem link="/department/pay" title="급여명세서" />
-        <MenuItem link="/department/resigner" title="급여명세서" />
+        <MenuItem link="/department/resigner" title="퇴사자 관리" />
       </MenuWrapper>
     </Wrapper>
   );

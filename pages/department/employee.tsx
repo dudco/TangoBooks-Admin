@@ -16,6 +16,10 @@ const ToolWrapper = styled.div`
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+
+    .space {
+      flex: 1;
+    }
   }
 
   margin-bottom: 20px;
@@ -57,9 +61,13 @@ const DepartmentEmployee = () => {
             />
           </MuiPickersUtilsProvider>
         </div>
-        <Button variant="contained" style={{ float: "right" }}>
-          추가
-        </Button>
+
+        <div>
+          <div className="space"></div>
+          <Button variant="contained" style={{ float: "right" }}>
+            추가
+          </Button>
+        </div>
       </ToolWrapper>
       <Paper>
         <Table>
