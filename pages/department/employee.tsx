@@ -69,7 +69,6 @@ const DepartmentEmployee = () => {
 
   useEffect(() => {
     if (user) {
-      console.log(user);
       getEmployees(user.token).then(({ data }) => {
         console.log(data);
         setDatas(data);
