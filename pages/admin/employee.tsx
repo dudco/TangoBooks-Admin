@@ -9,8 +9,11 @@ import EmployeeService from "../../api/services/EmployeeService";
 import EmployeeModel from "../../api/models/Employee";
 import Cookies from "js-cookie";
 import { useAuth } from "../../utils/user-context";
-import { AdminModel } from "../../api/models/Admin";
+import AdminModel from "../../api/models/Admin";
 import { useFormFiled } from "../../utils/utils";
+import nextCookies from "next-cookies";
+import AdminService from "../../api/services/AdminService";
+import { NextPageContext } from "next";
 
 const TableCell = styled(OriginCell)`
   text-align: center !important;
@@ -35,80 +38,62 @@ const getEmployees = async token => {
       return { data: [] };
     }
   } catch (err) {
-    console.log(err);
+    console.log(err.message);
+  }
+};
+
+const getAdminInfo = async token => {
+  try {
+    const res = await AdminService.get(token);
+    if (res.status === 200) {
+      return { data: res.data.data };
+    } else {
+      return { data: [] };
+    }
+  } catch (err) {
+    console.log(err.message);
   }
 };
 
 type DataType = Pick<AdminModel, "charge_per_day" | "lunch" | "pension" | "health_insurance" | "employment_insurance" | "income_tax" | "resident_tax" | "join_date" | "leave_date">;
 
-const AdminEmployee = () => {
+const AdminEmployee = (props: { adminInfo: AdminModel; employees: EmployeeModel[] }) => {
   const { user } = useAuth();
-  const initialData = {
-    charge_per_day: 0,
-    lunch: 0,
-    pension: 0,
-    health_insurance: 0,
-    employment_insurance: 0,
-    income_tax: 0,
-    resident_tax: 0,
-    join_date: new Date(),
-    leave_date: new Date()
+  const initialAdminInfo = {
+    charge_per_day: props.adminInfo.charge_per_day || 0,
+    lunch: props.adminInfo.lunch || 0,
+    pension: props.adminInfo.pension || 0,
+    health_insurance: props.adminInfo.health_insurance || 0,
+    employment_insurance: props.adminInfo.employment_insurance || 0,
+    income_tax: props.adminInfo.income_tax || 0,
+    resident_tax: props.adminInfo.resident_tax || 0,
+    join_date: props.adminInfo.join_date || new Date(),
+    leave_date: props.adminInfo.leave_date || new Date(),
+    ...props.adminInfo
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [employeeDatas, setEmployeeDatas] = useState<EmployeeModel[]>([]);
-  const [data, onChange, setData] = useFormFiled<DataType>(initialData);
-
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-  };
+  const [employeeDatas, setEmployeeDatas] = useState<EmployeeModel[]>(props.employees);
+  const [adminInfo, onChange, setAdminInfo] = useFormFiled<DataType>(initialAdminInfo);
 
   const onClickSave = async () => {
-    console.log(data)
-  }
-
-  useEffect(() => {
-    if (user) {
-      getEmployees(user.token).then(({ data }) => {
-        console.log(data);
-        setEmployeeDatas(data);
-      });
-    } else {
-      getEmployees(JSON.parse(Cookies.get()["user"]).token).then(({ data }) => {
-        console.log(data);
-        setEmployeeDatas(data);
-      });
+    const res = await AdminService.put(user.token, adminInfo);
+    if (res.status === 200) {
+      setAdminInfo(res.data.data);
+      alert("저장되었습니다.");
     }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      setData({
-        charge_per_day: user.charge_per_day,
-        lunch: user.lunch,
-        pension: user.pension,
-        health_insurance: user.health_insurance,
-        employment_insurance: user.employment_insurance,
-        income_tax: user.income_tax,
-        resident_tax: user.resident_tax,
-        join_date: user.join_date,
-        leave_date: user.leave_date
-      });
-    } else {
-    }
-  }, []);
+  };
 
   return (
     <div>
       <ToolWrapper>
         <div>
-          <TextField label="일당관리" variant="outlined" name="charge_per_day" value={data.charge_per_day} onChange={onChange} />
-          <TextField label="중식비관리" variant="outlined" name="lunch" value={data.lunch} onChange={onChange} />
-          <TextField label="국민연금" variant="outlined" name="pension" value={data.pension} onChange={onChange} />
-          <TextField label="건강보험" variant="outlined" name="health_insurance" value={data.health_insurance} onChange={onChange} />
-          <TextField label="고용보험" variant="outlined" name="employment_insurance" value={data.employment_insurance} onChange={onChange} />
-          <TextField label="소득세" variant="outlined" name="income_tax" value={data.income_tax} onChange={onChange} />
-          <TextField label="주민세" variant="outlined" name="resident_tax" value={data.resident_tax} onChange={onChange} />
+          <TextField label="일당관리" variant="outlined" name="charge_per_day" value={adminInfo.charge_per_day} onChange={onChange} />
+          <TextField label="중식비관리" variant="outlined" name="lunch" value={adminInfo.lunch} onChange={onChange} />
+          <TextField label="국민연금" variant="outlined" name="pension" value={adminInfo.pension} onChange={onChange} />
+          <TextField label="건강보험" variant="outlined" name="health_insurance" value={adminInfo.health_insurance} onChange={onChange} />
+          <TextField label="고용보험" variant="outlined" name="employment_insurance" value={adminInfo.employment_insurance} onChange={onChange} />
+          <TextField label="소득세" variant="outlined" name="income_tax" value={adminInfo.income_tax} onChange={onChange} />
+          <TextField label="주민세" variant="outlined" name="resident_tax" value={adminInfo.resident_tax} onChange={onChange} />
         </div>
         <div>
           <div>
@@ -118,10 +103,16 @@ const AdminEmployee = () => {
                 variant="inline"
                 format="yyyy년 MM월 dd일"
                 margin="normal"
-                id="date-picker"
+                id="join_date-picker"
                 label="입사일"
-                value={selectedDate}
-                onChange={handleDateChange}
+                name="join_date"
+                value={adminInfo.join_date}
+                onChange={(date: Date | null) => {
+                  setAdminInfo({
+                    ...adminInfo,
+                    join_date: date
+                  });
+                }}
                 KeyboardButtonProps={{
                   "aria-label": "change date"
                 }}
@@ -133,10 +124,16 @@ const AdminEmployee = () => {
                 variant="inline"
                 format="yyyy년 MM월 dd일"
                 margin="normal"
-                id="date-picker"
+                id="leave_date-picker"
                 label="퇴사일"
-                value={selectedDate}
-                onChange={handleDateChange}
+                name="leave_date"
+                value={adminInfo.leave_date}
+                onChange={(date: Date | null) => {
+                  setAdminInfo({
+                    ...adminInfo,
+                    leave_date: date
+                  });
+                }}
                 KeyboardButtonProps={{
                   "aria-label": "change date"
                 }}
@@ -144,7 +141,9 @@ const AdminEmployee = () => {
               />
             </MuiPickersUtilsProvider>
           </div>
-          <Button variant="contained">저장</Button>
+          <Button variant="contained" onClick={onClickSave}>
+            저장
+          </Button>
         </div>
       </ToolWrapper>
       <Paper>
@@ -164,7 +163,7 @@ const AdminEmployee = () => {
           </TableHead>
           <TableBody>
             {employeeDatas.map((data, idx) => (
-              <TableRow>
+              <TableRow key={data._id}>
                 <TableCell>{idx + 1}</TableCell>
                 <TableCell>{data.name}</TableCell>
                 <TableCell>{data.identity_number}</TableCell>
@@ -181,6 +180,16 @@ const AdminEmployee = () => {
       </Paper>
     </div>
   );
+};
+
+AdminEmployee.getInitialProps = async (ctx: NextPageContext) => {
+  const { user } = nextCookies(ctx);
+  const { token } = JSON.parse(user);
+
+  const employees = await getEmployees(token);
+  const adminInfo = await getAdminInfo(token);
+
+  return { employees: employees.data, adminInfo: adminInfo.data };
 };
 
 export default withLayout(AdminEmployee, { title: "근로자 관리" });

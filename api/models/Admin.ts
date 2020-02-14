@@ -1,6 +1,6 @@
 import UserModel from "./User";
 
-export interface AdminModel extends UserModel {
+export default interface AdminModel extends UserModel {
   _id: string;
   charge_per_day: number;
   lunch: number;

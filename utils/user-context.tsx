@@ -16,7 +16,6 @@ function AuthProvider(props) {
 
     if (user === null) {
       if (cookies["user"]) {
-        console.log(cookies["user"]);
         AuthService.regen(JSON.parse(cookies["user"]).token).then(res => {
           if (res.status === 200) {
             setUser({ ...res.data.user, token: res.data.token });
@@ -24,7 +23,6 @@ function AuthProvider(props) {
             const date = new Date();
             date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
 
-            console.log(res.data);
             Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
             if (router.pathname === "/login") router.replace("/");
           } else if (router.pathname !== "/login") {
