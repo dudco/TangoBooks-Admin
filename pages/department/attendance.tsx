@@ -2,13 +2,13 @@ import { withLayout } from "../../components/Layout";
 import { Table, Paper, TableHead, TableRow, TableCell, MenuItem, Select, TableBody } from "@material-ui/core";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
-import { getWeek, getMonth, startOfWeek, addDays } from "date-fns";
-import koLocale from "date-fns/locale/ko";
+import { startOfWeek, addDays } from "date-fns";
 import EmployeeService from "../../api/services/EmployeeService";
 import { useAuth } from "../../utils/user-context";
-import Cookies from "js-cookie";
 import EmployeeModel from "../../api/models/Employee";
 import moment from "moment";
+import { NextPageContext } from "next";
+import nextCookies from "next-cookies";
 
 const ToolsWrapper = styled.div`
   width: 100%;
@@ -38,14 +38,12 @@ const getEmployees = async token => {
   }
 };
 
-const DepartmentAttendance = () => {
+const DepartmentAttendance = (props: { employees: EmployeeModel[] }) => {
   const { user } = useAuth();
 
-  const [baseDate, setBaseDate] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [baseDate, setBaseDate] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const [workDay, setWorkDay] = useState(5);
-  // const [month, setMonth] = useState(getMonth(baseDate) + 1);
-  // const [week, setWeek] = useState(new Date().getDate());
-  const [datas, setDatas] = useState<EmployeeModel[]>([]);
+  const [datas, setDatas] = useState<EmployeeModel[]>(props.employees);
 
   const onClickPrev = () => {
     setBaseDate(addDays(baseDate, -7));
@@ -54,20 +52,6 @@ const DepartmentAttendance = () => {
   const onClickNext = () => {
     setBaseDate(addDays(baseDate, 7));
   };
-
-  useEffect(() => {
-    if (user) {
-      getEmployees(user.token).then(({ data }) => {
-        console.log(data);
-        setDatas(data);
-      });
-    } else {
-      getEmployees(user.token).then(({ data }) => {
-        console.log(data);
-        setDatas(data);
-      });
-    }
-  }, []);
 
   return (
     <div>
@@ -94,7 +78,7 @@ const DepartmentAttendance = () => {
                   <MenuItem value={5}>5일</MenuItem>
                 </Select>
               </TableCell>
-              {[0, 1, 2, 3, 4].map(val => {
+              {[0, 1, 2, 3, 4, 5, 6].map(val => {
                 const date = addDays(baseDate, val);
                 return (
                   <TableCell align="center">
@@ -106,56 +90,74 @@ const DepartmentAttendance = () => {
           </TableHead>
           <TableHead>
             <TableRow>
-              <TableCell style={{ width: "7%" }} size="small">
+              <TableCell style={{ width: "6%" }} align="center" size="small">
                 순번
               </TableCell>
-              <TableCell style={{ width: "7%" }} align="center">
+              <TableCell style={{ width: "10%" }} align="center">
                 성명
               </TableCell>
-              <TableCell style={{ width: "15%" }} align="center">
+              <TableCell style={{ width: "12%", color: "red" }} align="center">
+                일
+              </TableCell>
+              <TableCell style={{ width: "12%" }} align="center">
                 월
               </TableCell>
-              <TableCell style={{ width: "15%" }} align="center">
+              <TableCell style={{ width: "12%" }} align="center">
                 화
               </TableCell>
-              <TableCell style={{ width: "15%" }} align="center">
+              <TableCell style={{ width: "12%" }} align="center">
                 수
               </TableCell>
-              <TableCell style={{ width: "15%" }} align="center">
+              <TableCell style={{ width: "12%" }} align="center">
                 목
               </TableCell>
-              <TableCell style={{ width: "15%" }} align="center">
+              <TableCell style={{ width: "12%" }} align="center">
                 금
+              </TableCell>
+              <TableCell style={{ width: "12%", color: "blue" }} align="center">
+                토
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {datas.map((data, idx) => (
-              <TableRow>
-                <TableCell size="small">{idx + 1}</TableCell>
-                <TableCell align="center">{data.name}</TableCell>
-                {[0, 1, 2, 3, 4].map(val => {
-                  const date = addDays(baseDate, val);
-                  return (
-                    <TableCell align="center">
-                      <Select value={0} disabled={moment().diff(date, "days") > 0}>
-                        <MenuItem value={0}>출근</MenuItem>
-                        <MenuItem value={1}>지각</MenuItem>
-                        <MenuItem value={2}>조퇴</MenuItem>
-                        <MenuItem value={3}>월차</MenuItem>
-                        <MenuItem value={4}>결근</MenuItem>
-                        <MenuItem value={5}>유급</MenuItem>
-                      </Select>
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
+            {datas
+              .filter(data => !data.isLeave)
+              .map((data, idx) => (
+                <TableRow>
+                  <TableCell align="center" size="small">
+                    {idx + 1}
+                  </TableCell>
+                  <TableCell align="center">{data.name}</TableCell>
+                  {[0, 1, 2, 3, 4, 5, 6].map(val => {
+                    const date = addDays(baseDate, val);
+                    return (
+                      <TableCell align="center">
+                        <Select value={0} disabled={moment().diff(date, "days") < 0}>
+                          <MenuItem value={0}>출근</MenuItem>
+                          <MenuItem value={1}>지각</MenuItem>
+                          <MenuItem value={2}>조퇴</MenuItem>
+                          <MenuItem value={3}>월차</MenuItem>
+                          <MenuItem value={4}>결근</MenuItem>
+                          <MenuItem value={5}>유급</MenuItem>
+                        </Select>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </Paper>
     </div>
   );
+};
+
+DepartmentAttendance.getInitialProps = async (ctx: NextPageContext) => {
+  const { user } = nextCookies(ctx);
+  const { token } = JSON.parse(user);
+
+  const { data } = await getEmployees(token);
+  return { employees: data };
 };
 
 export default withLayout(DepartmentAttendance, { title: "출근부" });
