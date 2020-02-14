@@ -2,6 +2,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import nextCookie from "next-cookies";
 import Cookies from "js-cookie";
+import AuthService from "../api/services/AuthService";
 
 const AuthContext = React.createContext({ user: undefined, login: undefined, logout: undefined });
 
@@ -13,35 +14,36 @@ function AuthProvider(props) {
     // 링크가 바뀔때마다 유저 로그인 상태 확인
     const cookies = Cookies.get();
 
-    if (cookies["user"]) {
-      setUser(JSON.parse(cookies["user"]));
-      if (router.pathname === "/login") router.replace("/");
-    } else if (router.pathname !== "/login") {
-      router.replace("/login");
+    console.log(user);
+    if (user === null) {
+      if (cookies["user"]) {
+        setUser(JSON.parse(cookies["user"]));
+        if (router.pathname === "/login") router.replace("/");
+      } else if (router.pathname !== "/login") {
+        router.replace("/login");
+      }
     }
-    // if (cookies["user"]) {
-    //   setUser(JSON.parse(cookies["user"]));
-    //   if (router.pathname === "/login") router.replace("/");
-    // } else if (router.pathname !== "/login") {
-    //   router.replace("/login");
-    // }
   }, [router.pathname]);
 
-  const login = async (id: string, pw: string) => {
+  const login = async (user_id: string, user_pw: string) => {
     // Please Set Login Function
-    const user = { name: id, type: id === "root" || id === "관리자" ? "Admin" : "Department" };
-    setUser(user);
-    Cookies.set("user", JSON.stringify(user), { expires: 1 });
-    router.push("/");
-    // const res = await AuthService.login(id, pw);
-    // if (res.status === 200) {
-    //   setUser(res.data.data);
-    //   Cookies.set("user", JSON.stringify(res.data.data), { expires: 1 });
-    //   // login(JSON.stringify(res.data.data));
-    //   router.push("/");
-    // } else {
-    //   alert("로그인에 실패했습니다.");
-    // }
+    const res = await AuthService.login({ user_id, user_pw });
+    if (res.status === 200) {
+      setUser(res.data.user);
+
+      const date = new Date();
+      date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
+
+      console.log(res.data);
+      Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
+      router.push("/");
+    } else {
+      alert("로그인에 실패했습니다.");
+    }
+    // const user = { name: id, type: id === "root" || id === "관리자" ? "Admin" : "Department" };
+    // setUser(user);
+    // Cookies.set("user", JSON.stringify(user), { expires: 1 });
+    // router.push("/");
   };
 
   const logout = () => {
