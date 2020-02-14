@@ -17,6 +17,21 @@ const BG = styled.img`
   height: 100%;
 `;
 
+const Filter = styled.div`
+  width: 100%;
+  height: 100%;
+
+  ::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    background-color: #000;
+    opacity: 0.3;
+  }
+`;
+
 const Form = styled.form`
   position: absolute;
 
@@ -85,7 +100,9 @@ const Login = () => {
 
   return (
     <Wrapper>
-      <BG src={"/static/Login.jpg"} />
+      <Filter>
+        <BG src={"/static/Login.jpg"} />
+      </Filter>
       <Title>
         <div className="line" />
         서울특별시 한강사업본수
