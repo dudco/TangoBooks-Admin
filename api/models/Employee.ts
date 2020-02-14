@@ -2,7 +2,7 @@ import DepartmentModel from "./Department";
 
 export default interface EmployeeModel {
   _id: string;
-  name: number;
+  name: string;
   identity_number: string;
   address: string; // 주소
   phone: string;
@@ -12,6 +12,7 @@ export default interface EmployeeModel {
   department: DepartmentModel;
 
   isLeave: boolean;
+  join: Date;
 
   createAt: Date;
   updateAt: Date;

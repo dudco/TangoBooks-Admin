@@ -1,9 +1,14 @@
 import { withLayout } from "../../components/Layout";
-import { Table, Paper, TableHead, TableRow, TableCell, MenuItem, Select } from "@material-ui/core";
+import { Table, Paper, TableHead, TableRow, TableCell, MenuItem, Select, TableBody } from "@material-ui/core";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { getWeek, getMonth, startOfWeek, addDays } from "date-fns";
 import koLocale from "date-fns/locale/ko";
+import EmployeeService from "../../api/services/EmployeeService";
+import { useAuth } from "../../utils/user-context";
+import Cookies from "js-cookie";
+import EmployeeModel from "../../api/models/Employee";
+import moment from "moment";
 
 const ToolsWrapper = styled.div`
   width: 100%;
@@ -19,11 +24,28 @@ const ToolsWrapper = styled.div`
   margin-bottom: 15px;
   margin-right: 15px;
 `;
-const AdminEmployee = () => {
+
+const getEmployees = async token => {
+  try {
+    const res = await EmployeeService.get(token);
+    if (res.status === 200) {
+      return { data: res.data.data };
+    } else {
+      return { data: [] };
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const DepartmentAttendance = () => {
+  const { user } = useAuth();
+
   const [baseDate, setBaseDate] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [workDay, setWorkDay] = useState(5);
   // const [month, setMonth] = useState(getMonth(baseDate) + 1);
   // const [week, setWeek] = useState(new Date().getDate());
+  const [datas, setDatas] = useState<EmployeeModel[]>([]);
 
   const onClickPrev = () => {
     setBaseDate(addDays(baseDate, -7));
@@ -32,6 +54,20 @@ const AdminEmployee = () => {
   const onClickNext = () => {
     setBaseDate(addDays(baseDate, 7));
   };
+
+  useEffect(() => {
+    if (user) {
+      getEmployees(user.token).then(({ data }) => {
+        console.log(data);
+        setDatas(data);
+      });
+    } else {
+      getEmployees(JSON.parse(Cookies.get()["user"]).token).then(({ data }) => {
+        console.log(data);
+        setDatas(data);
+      });
+    }
+  }, []);
 
   return (
     <div>
@@ -66,13 +102,6 @@ const AdminEmployee = () => {
                   </TableCell>
                 );
               })}
-              {/*               
-              <TableCell align="center">
-                {addDays(startDate, 1).getMonth() + 1}/{addDays(startDate.getDate() + 1, 1)}
-              </TableCell>
-              <TableCell align="center">2/5</TableCell>
-              <TableCell align="center">2/6</TableCell>
-              <TableCell align="center">2/7</TableCell> */}
             </TableRow>
           </TableHead>
           <TableHead>
@@ -100,10 +129,33 @@ const AdminEmployee = () => {
               </TableCell>
             </TableRow>
           </TableHead>
+          <TableBody>
+            {datas.map((data, idx) => (
+              <TableRow>
+                <TableCell size="small">{idx + 1}</TableCell>
+                <TableCell align="center">{data.name}</TableCell>
+                {[0, 1, 2, 3, 4].map(val => {
+                  const date = addDays(baseDate, val);
+                  return (
+                    <TableCell align="center">
+                      <Select value={0} disabled={moment().diff(date, "days") > 0}>
+                        <MenuItem value={0}>출근</MenuItem>
+                        <MenuItem value={1}>지각</MenuItem>
+                        <MenuItem value={2}>조퇴</MenuItem>
+                        <MenuItem value={3}>월차</MenuItem>
+                        <MenuItem value={4}>결근</MenuItem>
+                        <MenuItem value={5}>유급</MenuItem>
+                      </Select>
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </Paper>
     </div>
   );
 };
 
-export default withLayout(AdminEmployee, { title: "출근부" });
+export default withLayout(DepartmentAttendance, { title: "출근부" });

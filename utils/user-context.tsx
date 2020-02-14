@@ -14,11 +14,23 @@ function AuthProvider(props) {
     // 링크가 바뀔때마다 유저 로그인 상태 확인
     const cookies = Cookies.get();
 
-    console.log(user);
     if (user === null) {
       if (cookies["user"]) {
-        setUser(JSON.parse(cookies["user"]));
-        if (router.pathname === "/login") router.replace("/");
+        console.log(cookies["user"]);
+        AuthService.regen(JSON.parse(cookies["user"]).token).then(res => {
+          if (res.status === 200) {
+            setUser({ ...res.data.user, token: res.data.token });
+
+            const date = new Date();
+            date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
+
+            console.log(res.data);
+            Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
+            if (router.pathname === "/login") router.replace("/");
+          } else if (router.pathname !== "/login") {
+            router.replace("/login");
+          }
+        });
       } else if (router.pathname !== "/login") {
         router.replace("/login");
       }
@@ -29,7 +41,7 @@ function AuthProvider(props) {
     // Please Set Login Function
     const res = await AuthService.login({ user_id, user_pw });
     if (res.status === 200) {
-      setUser(res.data.user);
+      setUser({ ...res.data.user, token: res.data.token });
 
       const date = new Date();
       date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
