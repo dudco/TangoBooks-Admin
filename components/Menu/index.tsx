@@ -59,7 +59,7 @@ export const AdminMenu = () => {
         <MenuItem link="/admin/department" title="부서 관리" />
         <MenuItem link="/admin/employee" title="공공근로자 관리" />
         <MenuItem link="/admin/salary" title="급여 관리" />
-        <MenuItem link="/admin/resigner" title="퇴사자 관리" />
+        <MenuItem link="/resigner" title="퇴사자 관리" />
       </MenuWrapper>
     </Wrapper>
   );
@@ -79,7 +79,7 @@ export const DepartmentMenu = () => {
         <MenuItem link="/department/employee" title="공공근로자 관리" />
         <MenuItem link="/department/attendance" title="출근부" />
         <MenuItem link="/department/pay" title="급여명세서" />
-        <MenuItem link="/department/resigner" title="퇴사자 관리" />
+        <MenuItem link="/resigner" title="퇴사자 관리" />
       </MenuWrapper>
     </Wrapper>
   );

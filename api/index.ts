@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-
+import cookies from "js-cookie";
 const singleton = Symbol();
 
 class Api {
@@ -16,7 +16,6 @@ class Api {
     if (!this[singleton]) {
       this[singleton] = new this();
     }
-
     return this[singleton];
   }
 }

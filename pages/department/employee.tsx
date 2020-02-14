@@ -11,6 +11,8 @@ import Cookies from "js-cookie";
 import { useAuth } from "../../utils/user-context";
 import EmployeeModel from "../../api/models/Employee";
 import { useFormFiled } from "../../utils/utils";
+import nextCookies from "next-cookies";
+import { NextPageContext } from "next";
 
 const TableCell = styled(OriginCell)`
   text-align: center !important;
@@ -46,10 +48,10 @@ const getEmployees = async token => {
 
 type DataType = Pick<EmployeeModel, "name" | "phone" | "identity_number" | "address" | "telephone" | "bank" | "account" | "join">;
 
-const DepartmentEmployee = () => {
+const DepartmentEmployee = (props: { employees: EmployeeModel[] }) => {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [datas, setDatas] = useState<EmployeeModel[]>([]);
+  const [employees, setEmployees] = useState<EmployeeModel[]>(props.employees);
   const initialForm = {
     name: "",
     phone: "",
@@ -66,27 +68,21 @@ const DepartmentEmployee = () => {
     setSelectedDate(date);
     setForm({ ...form, join: date });
   };
-
-  useEffect(() => {
-    if (user) {
-      getEmployees(user.token).then(({ data }) => {
-        console.log(data);
-        setDatas(data);
-      });
-    } else {
-      getEmployees(JSON.parse(Cookies.get()["user"]).token).then(({ data }) => {
-        console.log(data);
-        setDatas(data);
-      });
-    }
-  }, []);
-
   const onClickAdd = async () => {
-    console.log(form);
-    const res = await EmployeeService.post(form, user.token);
+    // console.log(form);
+    const res = await EmployeeService.post(user.token, form);
     if (res.status === 200) {
       getEmployees(user.token).then(({ data }) => {
-        setDatas(data);
+        setEmployees(data);
+      });
+    }
+  };
+
+  const onClickDelete = id => async _ => {
+    const res = await EmployeeService.delete(user.token, id);
+    if (res.status === 200) {
+      getEmployees(user.token).then(({ data }) => {
+        setEmployees(data);
       });
     }
   };
@@ -145,27 +141,39 @@ const DepartmentEmployee = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {datas.map((data, idx) => (
-              <TableRow>
-                <TableCell>{idx + 1}</TableCell>
-                <TableCell>{data.name}</TableCell>
-                <TableCell>{data.identity_number}</TableCell>
-                <TableCell>{data.address}</TableCell>
-                <TableCell>{data.phone}</TableCell>
-                <TableCell>{data.telephone}</TableCell>
-                <TableCell>{data.bank}</TableCell>
-                <TableCell>{data.bank}</TableCell>
-                <TableCell>{data.department.name}</TableCell>
-                <TableCell>
-                  <Button variant="contained">퇴사</Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {employees
+              .filter(data => !data.isLeave)
+              .map((data, idx) => (
+                <TableRow>
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell>{data.name}</TableCell>
+                  <TableCell>{data.identity_number}</TableCell>
+                  <TableCell>{data.address}</TableCell>
+                  <TableCell>{data.phone}</TableCell>
+                  <TableCell>{data.telephone}</TableCell>
+                  <TableCell>{data.bank}</TableCell>
+                  <TableCell>{data.bank}</TableCell>
+                  <TableCell>{data.department.name}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" onClick={onClickDelete(data._id)}>
+                      퇴사
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </Paper>
     </div>
   );
+};
+
+DepartmentEmployee.getInitialProps = async (ctx: NextPageContext) => {
+  const { user } = nextCookies(ctx);
+  const { token } = JSON.parse(user);
+  const employees = await getEmployees(token);
+
+  return { employees: employees.data };
 };
 
 export default withLayout(DepartmentEmployee, { title: "근로자 관리" });

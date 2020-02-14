@@ -162,19 +162,21 @@ const AdminEmployee = (props: { adminInfo: AdminModel; employees: EmployeeModel[
             </TableRow>
           </TableHead>
           <TableBody>
-            {employeeDatas.map((data, idx) => (
-              <TableRow key={data._id}>
-                <TableCell>{idx + 1}</TableCell>
-                <TableCell>{data.name}</TableCell>
-                <TableCell>{data.identity_number}</TableCell>
-                <TableCell>{data.address}</TableCell>
-                <TableCell>{data.phone}</TableCell>
-                <TableCell>{data.telephone}</TableCell>
-                <TableCell>{data.bank}</TableCell>
-                <TableCell>{data.bank}</TableCell>
-                <TableCell>{data.department.name}</TableCell>
-              </TableRow>
-            ))}
+            {employeeDatas
+              .filter(data => !data.isLeave)
+              .map((data, idx) => (
+                <TableRow key={data._id}>
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell>{data.name}</TableCell>
+                  <TableCell>{data.identity_number}</TableCell>
+                  <TableCell>{data.address}</TableCell>
+                  <TableCell>{data.phone}</TableCell>
+                  <TableCell>{data.telephone}</TableCell>
+                  <TableCell>{data.bank}</TableCell>
+                  <TableCell>{data.bank}</TableCell>
+                  <TableCell>{data.department.name}</TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </Paper>
@@ -185,7 +187,6 @@ const AdminEmployee = (props: { adminInfo: AdminModel; employees: EmployeeModel[
 AdminEmployee.getInitialProps = async (ctx: NextPageContext) => {
   const { user } = nextCookies(ctx);
   const { token } = JSON.parse(user);
-
   const employees = await getEmployees(token);
   const adminInfo = await getAdminInfo(token);
 

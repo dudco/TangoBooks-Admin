@@ -5,6 +5,9 @@ import styled from "styled-components";
 import { useFormFiled } from "../../utils/utils";
 import DepartmentModel from "../../api/models/Department";
 import DepartmentService from "../../api/services/DepartmentService";
+import { useAuth } from "../../utils/user-context";
+import nextCookies from "next-cookies";
+import { NextPageContext } from "next";
 
 const TableCell = styled(OriginCell)`
   text-align: center !important;
@@ -21,9 +24,9 @@ const ToolWrapper = styled.div`
 
 type DataType = Pick<DepartmentModel, "name" | "phone" | "user_id" | "user_pw">;
 
-const getDepartments = async () => {
+const getDepartments = async token => {
   try {
-    const res = await DepartmentService.get();
+    const res = await DepartmentService.get(token);
     if (res.status === 200) {
       return { data: res.data.data };
     } else {
@@ -35,6 +38,8 @@ const getDepartments = async () => {
 };
 
 const AdminDepartment = props => {
+  const { user } = useAuth();
+
   const initialData = {
     name: "",
     phone: "",
@@ -46,17 +51,17 @@ const AdminDepartment = props => {
   const [departments, setDepartments] = useState<DepartmentModel[]>(props.data || []);
 
   const onClickAdd = async () => {
-    const res = await DepartmentService.post(data);
+    const res = await DepartmentService.post(user.token, data);
     if (res.status === 200) {
       setData(initialData);
-      setDepartments((await getDepartments()).data);
+      setDepartments((await getDepartments(user.token)).data);
     }
   };
 
   const onClickDel = id => async e => {
-    const res = await DepartmentService.delete(id);
+    const res = await DepartmentService.delete(user.token, id);
     if (res.status === 200) {
-      setDepartments((await getDepartments()).data);
+      setDepartments((await getDepartments(user.token)).data);
     }
   };
 
@@ -103,8 +108,10 @@ const AdminDepartment = props => {
   );
 };
 
-AdminDepartment.getInitialProps = async () => {
-  return await getDepartments();
+AdminDepartment.getInitialProps = async (ctx: NextPageContext) => {
+  const { user } = nextCookies(ctx);
+  const { token } = JSON.parse(user);
+  return await getDepartments(token);
 };
 
 export default withLayout(AdminDepartment, { title: "부서 관리" });

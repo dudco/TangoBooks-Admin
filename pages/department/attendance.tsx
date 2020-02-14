@@ -62,7 +62,7 @@ const DepartmentAttendance = () => {
         setDatas(data);
       });
     } else {
-      getEmployees(JSON.parse(Cookies.get()["user"]).token).then(({ data }) => {
+      getEmployees(user.token).then(({ data }) => {
         console.log(data);
         setDatas(data);
       });
