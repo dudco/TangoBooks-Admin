@@ -135,7 +135,7 @@ const AdminEmployeeAdd = (props: { employees: EmployeeModel[]; departments: Depa
               margin="normal"
               id="date-picker"
               label="입사일"
-              value={selectedDate}
+              value={form.join}
               onChange={handleDateChange}
               KeyboardButtonProps={{
                 "aria-label": "change date"

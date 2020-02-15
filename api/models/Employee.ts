@@ -14,6 +14,8 @@ export default interface EmployeeModel {
   isLeave: boolean;
   join: Date;
 
+  attendances: { date: string; attend: number }[];
+
   createAt: Date;
   updateAt: Date;
 }

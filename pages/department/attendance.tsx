@@ -1,20 +1,24 @@
 import { withLayout } from "../../components/Layout";
-import { Table, Paper, TableHead, TableRow, TableCell, MenuItem, Select, TableBody } from "@material-ui/core";
+import { Table, Paper, TableHead, TableRow, TableCell, MenuItem, Select, TableBody, Button } from "@material-ui/core";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
-import { startOfWeek, addDays } from "date-fns";
+import { startOfWeek, addDays, getDay } from "date-fns";
 import EmployeeService from "../../api/services/EmployeeService";
 import { useAuth } from "../../utils/user-context";
 import EmployeeModel from "../../api/models/Employee";
 import moment from "moment";
 import { NextPageContext } from "next";
 import nextCookies from "next-cookies";
+import Attendance from "../../api/services/Attendance";
 
 const ToolsWrapper = styled.div`
   width: 100%;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+
   font-size: 20px;
-  & > span {
+
+  & > div > span {
     margin-left: 5px;
 
     &:not(:nth-child(2)) {
@@ -53,16 +57,47 @@ const DepartmentAttendance = (props: { employees: EmployeeModel[] }) => {
     setBaseDate(addDays(baseDate, 7));
   };
 
+  const onChangeSelect = (id, date) => e => {
+    const copyData = JSON.parse(JSON.stringify(datas)) as EmployeeModel[];
+    const idx = copyData.findIndex(data => data._id === id);
+    if (idx < 0) {
+      return;
+    }
+    const dateIdx = copyData[idx].attendances.findIndex(attendance => attendance.date === date);
+    if (dateIdx < 0) {
+      return;
+    }
+    copyData[idx].attendances[dateIdx].attend = e.target.value;
+    setDatas(copyData);
+  };
+
+  const onClickSave = async () => {
+    console.log(datas);
+
+    const res = await Attendance.put(user.token, { employees: datas });
+    if (res.status === 200) {
+      const { data } = await getEmployees(user.token);
+      setDatas(data);
+    }
+  };
+
   return (
     <div>
       <ToolsWrapper>
-        {addDays(baseDate, 6).getMonth() + 1 !== baseDate.getMonth() + 1 &&
-          `(${addDays(baseDate, 6).getMonth() + 1}월 ${Math.floor((addDays(baseDate, 6).getDate() + 1) / 7 + 1)}번째 주)`}
-        <span onClick={onClickPrev}>◀︎</span>
-        <span>
-          {baseDate.getMonth() + 1}월 {Math.ceil((baseDate.getDate() + 1) / 7 + 1)}번째 주
-        </span>
-        <span onClick={onClickNext}>▶︎</span>
+        <div>
+          <Button variant="contained" onClick={onClickSave}>
+            저장
+          </Button>
+        </div>
+        <div>
+          {addDays(baseDate, 6).getMonth() + 1 !== baseDate.getMonth() + 1 &&
+            `(${addDays(baseDate, 6).getMonth() + 1}월 ${Math.floor((addDays(baseDate, 6).getDate() + 1) / 7 + 1)}번째 주)`}
+          <span onClick={onClickPrev}>◀︎</span>
+          <span>
+            {baseDate.getMonth() + 1}월 {Math.ceil((baseDate.getDate() + 1) / 7 + 1)}번째 주
+          </span>
+          <span onClick={onClickNext}>▶︎</span>
+        </div>
       </ToolsWrapper>
       <Paper>
         <Table>
@@ -81,7 +116,7 @@ const DepartmentAttendance = (props: { employees: EmployeeModel[] }) => {
               {[0, 1, 2, 3, 4, 5, 6].map(val => {
                 const date = addDays(baseDate, val);
                 return (
-                  <TableCell align="center">
+                  <TableCell align="center" key={date.getTime()}>
                     {date.getMonth() + 1}/{date.getDate()}
                   </TableCell>
                 );
@@ -123,22 +158,36 @@ const DepartmentAttendance = (props: { employees: EmployeeModel[] }) => {
             {datas
               .filter(data => !data.isLeave)
               .map((data, idx) => (
-                <TableRow>
+                <TableRow key={data._id}>
                   <TableCell align="center" size="small">
                     {idx + 1}
                   </TableCell>
                   <TableCell align="center">{data.name}</TableCell>
                   {[0, 1, 2, 3, 4, 5, 6].map(val => {
                     const date = addDays(baseDate, val);
+                    const idx = data.attendances.findIndex(attend => attend.date === moment(date).format("YYYYMMDD"));
+                    let value = 0;
+
+                    if (idx >= 0) {
+                      value = data.attendances[idx].attend;
+                    } else if (getDay(date) === 0 || getDay(date) === 6) {
+                      value = 6;
+                    }
+
                     return (
-                      <TableCell align="center">
-                        <Select value={0} disabled={moment().diff(date, "days") < 0}>
+                      <TableCell align="center" key={date.getTime()}>
+                        <Select
+                          value={value}
+                          disabled={moment().diff(date, "days") < 0 || moment(data.join).diff(date, "days") > 0}
+                          onChange={onChangeSelect(data._id, moment(date).format("YYYYMMDD"))}
+                        >
                           <MenuItem value={0}>출근</MenuItem>
                           <MenuItem value={1}>지각</MenuItem>
                           <MenuItem value={2}>조퇴</MenuItem>
                           <MenuItem value={3}>월차</MenuItem>
                           <MenuItem value={4}>결근</MenuItem>
                           <MenuItem value={5}>유급</MenuItem>
+                          <MenuItem value={6}>휴일</MenuItem>
                         </Select>
                       </TableCell>
                     );

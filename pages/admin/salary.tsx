@@ -1,10 +1,40 @@
 import { withLayout } from "../../components/Layout";
 import { useEffect, useState } from "react";
 import { Paper, Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
+import moment from "moment";
+import styled from "styled-components";
+const ToolsWrapper = styled.div`
+  width: 100%;
+  font-size: 20px;
+
+  & > span {
+    margin-left: 5px;
+
+    &:not(:nth-child(2)) {
+      cursor: pointer;
+    }
+  }
+  margin-bottom: 15px;
+  margin-right: 15px;
+`;
 
 const AdminSalary = () => {
+  const [month, setMonth] = useState(moment().get("month") + 1);
+  const onClickPrev = () => {
+    setMonth(month - 1);
+  };
+
+  const onClickNext = () => {
+    setMonth(month + 1);
+  };
+
   return (
     <div>
+      <ToolsWrapper>
+        <span onClick={onClickPrev}>◀︎</span>
+        <span>{month}월</span>
+        <span onClick={onClickNext}>▶︎</span>
+      </ToolsWrapper>
       <Paper style={{ width: "2000px", marginRight: "50px" }}>
         <Table>
           <TableHead>
