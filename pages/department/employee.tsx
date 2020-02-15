@@ -10,6 +10,7 @@ import EmployeeService from "../../api/services/EmployeeService";
 import Cookies from "js-cookie";
 import { useAuth } from "../../utils/user-context";
 import EmployeeModel from "../../api/models/Employee";
+import DepartmentModel from "../../api/models/Department";
 import { useFormFiled } from "../../utils/utils";
 import nextCookies from "next-cookies";
 import { NextPageContext } from "next";
@@ -153,7 +154,7 @@ const DepartmentEmployee = (props: { employees: EmployeeModel[] }) => {
                   <TableCell>{data.telephone}</TableCell>
                   <TableCell>{data.bank}</TableCell>
                   <TableCell>{data.bank}</TableCell>
-                  <TableCell>{data.department.name}</TableCell>
+                  <TableCell>{(data.department as DepartmentModel).name}</TableCell>
                   <TableCell>
                     <Button variant="contained" onClick={onClickDelete(data._id)}>
                       퇴사

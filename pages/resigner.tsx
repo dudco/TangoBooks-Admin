@@ -4,6 +4,7 @@ import { NextPageContext } from "next";
 import EmployeeService from "../api/services/EmployeeService";
 import nextCookies from "next-cookies";
 import EmployeeModel from "../api/models/Employee";
+import DepartmentModel from "../api/models/Department";
 import { Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, TextField } from "@material-ui/core";
 
 const getEmployees = async token => {
@@ -49,7 +50,7 @@ const Resigner = (props: { employees: EmployeeModel[] }) => {
                 <TableCell align="center">{data.telephone}</TableCell>
                 <TableCell align="center">{data.bank}</TableCell>
                 <TableCell align="center">{data.bank}</TableCell>
-                <TableCell align="center">{data.department.name}</TableCell>
+                <TableCell align="center">{(data.department as DepartmentModel).name}</TableCell>
               </TableRow>
             ))}
         </TableBody>
