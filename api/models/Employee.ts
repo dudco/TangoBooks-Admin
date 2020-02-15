@@ -9,7 +9,7 @@ export default interface EmployeeModel {
   telephone: string; // 자택
   bank: string;
   account: string;
-  department: DepartmentModel;
+  department: DepartmentModel | string;
 
   isLeave: boolean;
   join: Date;

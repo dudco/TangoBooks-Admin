@@ -1,19 +1,20 @@
-import { withLayout } from "../../components/Layout";
+import { withLayout } from "../../../components/Layout";
 import { useEffect, useState } from "react";
 import { Paper, Table, TableHead, TableRow, TableCell as OriginCell, TableBody, Button, TextField } from "@material-ui/core";
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import koLocale from "date-fns/locale/ko";
 import styled from "styled-components";
-import EmployeeService from "../../api/services/EmployeeService";
-import EmployeeModel from "../../api/models/Employee";
+import EmployeeService from "../../../api/services/EmployeeService";
+import EmployeeModel from "../../../api/models/Employee";
 import Cookies from "js-cookie";
-import { useAuth } from "../../utils/user-context";
-import AdminModel from "../../api/models/Admin";
-import { useFormFiled } from "../../utils/utils";
+import { useAuth } from "../../../utils/user-context";
+import AdminModel from "../../../api/models/Admin";
+import { useFormFiled } from "../../../utils/utils";
 import nextCookies from "next-cookies";
-import AdminService from "../../api/services/AdminService";
+import AdminService from "../../../api/services/AdminService";
 import { NextPageContext } from "next";
+import DepartmentModel from "../../../api/models/Department";
 
 const TableCell = styled(OriginCell)`
   text-align: center !important;
@@ -174,7 +175,7 @@ const AdminEmployee = (props: { adminInfo: AdminModel; employees: EmployeeModel[
                   <TableCell>{data.telephone}</TableCell>
                   <TableCell>{data.bank}</TableCell>
                   <TableCell>{data.bank}</TableCell>
-                  <TableCell>{data.department.name}</TableCell>
+                  <TableCell>{(data.department as DepartmentModel).name}</TableCell>
                 </TableRow>
               ))}
           </TableBody>
