@@ -60,6 +60,7 @@ export const AdminMenu = () => {
         <MenuItem link="/admin/employee" title="공공근로자 관리" />
         <MenuItem link="/admin/employee/add" title="공공근로자 추가" />
         <MenuItem link="/admin/salary" title="급여 관리" />
+        <MenuItem link="/admin/holidays" title="유급 휴일 관리" />
         <MenuItem link="/resigner" title="퇴사자 관리" />
       </MenuWrapper>
     </Wrapper>
