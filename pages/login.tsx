@@ -111,7 +111,7 @@ const Login = () => {
       </Title>
       <Form>
         <input name="id" type="text" value={id} onChange={e => setId(e.target.value)} placeholder="ID" />
-        <input name="pw" type="text" value={pw} onChange={e => setPw(e.target.value)} placeholder="PW" />
+        <input name="pw" type="password" value={pw} onChange={e => setPw(e.target.value)} placeholder="PW" />
         <button type="submit" onClick={onConfirm}>
           로그인
         </button>

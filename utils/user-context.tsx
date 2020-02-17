@@ -16,19 +16,26 @@ function AuthProvider(props) {
 
     if (user === null) {
       if (cookies["user"]) {
-        AuthService.regen(JSON.parse(cookies["user"]).token).then(res => {
-          if (res.status === 200) {
-            setUser({ ...res.data.user, token: res.data.token });
+        AuthService.regen(JSON.parse(cookies["user"]).token)
+          .then(res => {
+            if (res.status === 200) {
+              setUser({ ...res.data.user, token: res.data.token });
 
-            const date = new Date();
-            date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
+              const date = new Date();
+              date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
 
-            Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
-            if (router.pathname === "/login") router.replace("/");
-          } else if (router.pathname !== "/login") {
+              Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
+              if (router.pathname === "/login") {
+                router.replace(res.data.user.type === "Admin" ? "/admin" : "/department/attendance");
+              }
+            } else if (router.pathname !== "/login") {
+              router.replace("/login");
+            }
+          })
+          .catch(err => {
+            console.log(err);
             router.replace("/login");
-          }
-        });
+          });
       } else if (router.pathname !== "/login") {
         router.replace("/login");
       }
@@ -44,9 +51,9 @@ function AuthProvider(props) {
       const date = new Date();
       date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
 
-      console.log(res.data);
+      // console.log(res.data);
       Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
-      router.push("/");
+      router.push(res.data.user.type === "Admin" ? "/admin" : "/department/attendance");
     } else {
       alert("로그인에 실패했습니다.");
     }

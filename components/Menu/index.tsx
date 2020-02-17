@@ -2,6 +2,7 @@ import MenuItem from "./MenuItem";
 import styled from "styled-components";
 import Router from "next/router";
 import { useState } from "react";
+import { useAuth } from "../../utils/user-context";
 
 const Wrapper = styled.div`
   position: fixed;
@@ -35,15 +36,17 @@ const MenuWrapper = styled.div`
   top: 20%;
 `;
 
-const Top = () => (
-  <div
-    onClick={() => {
-      Router.push("/");
-    }}
-  >
-    <h1>한강사업본부</h1>
-  </div>
-);
+const Top = ({ redUrl }) => {
+  return (
+    <div
+      onClick={() => {
+        Router.push(redUrl);
+      }}
+    >
+      <h1>한강사업본부</h1>
+    </div>
+  );
+};
 
 export const AdminMenu = () => {
   const [show, setShow] = useState("none");
@@ -54,7 +57,7 @@ export const AdminMenu = () => {
 
   return (
     <Wrapper>
-      <Top />
+      <Top redUrl="/admin" />
       <MenuWrapper>
         <MenuItem link="/admin/department" title="부서 관리" />
         <MenuItem link="/admin/employee" title="공공근로자 관리" />
@@ -76,7 +79,7 @@ export const DepartmentMenu = () => {
 
   return (
     <Wrapper>
-      <Top />
+      <Top redUrl="/department/attendance" />
       <MenuWrapper>
         <MenuItem link="/department/employee" title="공공근로자 관리" />
         <MenuItem link="/department/attendance" title="출근부" />
