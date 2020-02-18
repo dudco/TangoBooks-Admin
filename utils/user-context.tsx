@@ -16,26 +16,12 @@ function AuthProvider(props) {
 
     if (user === null) {
       if (cookies["user"]) {
-        AuthService.regen(JSON.parse(cookies["user"]).token)
-          .then(res => {
-            if (res.status === 200) {
-              setUser({ ...res.data.user, token: res.data.token });
-
-              const date = new Date();
-              date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
-
-              Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
-              if (router.pathname === "/login") {
-                router.replace(res.data.user.type === "Admin" ? "/admin" : "/department/attendance");
-              }
-            } else if (router.pathname !== "/login") {
-              router.replace("/login");
-            }
-          })
-          .catch(err => {
-            console.log(err);
-            router.replace("/login");
-          });
+        const u = JSON.parse(cookies["user"]);
+        if (u) {
+          setUser(u);
+        } else {
+          router.replace("/login");
+        }
       } else if (router.pathname !== "/login") {
         router.replace("/login");
       }
@@ -43,24 +29,13 @@ function AuthProvider(props) {
   }, [router.pathname]);
 
   const login = async (user_id: string, user_pw: string) => {
-    // Please Set Login Function
-    const res = await AuthService.login({ user_id, user_pw });
-    if (res.status === 200) {
-      setUser({ ...res.data.user, token: res.data.token });
-
-      const date = new Date();
-      date.setTime(date.getTime() + (1 / 2.4) * 24 * 60 * 60 * 1000);
-
-      // console.log(res.data);
-      Cookies.set("user", JSON.stringify({ token: res.data.token, type: res.data.user.type }), { expires: date });
-      router.push(res.data.user.type === "Admin" ? "/admin" : "/department/attendance");
+    if (user_id === "root" && user_pw === "root") {
+      setUser({ name: "root" });
+      Cookies.set("user", JSON.stringify({ name: "root" }), { expires: 1 });
+      router.push("/?q=t");
     } else {
       alert("로그인에 실패했습니다.");
     }
-    // const user = { name: id, type: id === "root" || id === "관리자" ? "Admin" : "Department" };
-    // setUser(user);
-    // Cookies.set("user", JSON.stringify(user), { expires: 1 });
-    // router.push("/");
   };
 
   const logout = () => {

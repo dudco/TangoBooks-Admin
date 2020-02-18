@@ -12,7 +12,11 @@ class Error extends React.Component<ErrorProps> {
   }
 
   render() {
-    return <Layout title={this.props.statusCode + ""} subTitle="페이지를 찾을 수 없습니다." showBanner={true} />;
+    return (
+      <Layout>
+        <div>페이지를 찾을 수 없습니다.</div>
+      </Layout>
+    );
   }
 }
 

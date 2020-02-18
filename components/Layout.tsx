@@ -1,7 +1,6 @@
 import styled from "styled-components";
-import { AdminMenu, DepartmentMenu } from "./Menu";
+import { AdminMenu } from "./Menu";
 import Header from "./Header";
-import Banner from "./Banner";
 import { NextPage } from "next";
 import { Component } from "react";
 import { useAuth } from "../utils/user-context";
@@ -32,9 +31,6 @@ const ChildWrapper = styled.div`
 
 interface LayoutProps {
   children?: React.ReactElement;
-  title: string;
-  subTitle: string;
-  showBanner: boolean;
 }
 
 const Layout: NextPage<LayoutProps> = (props: LayoutProps) => {
@@ -43,17 +39,16 @@ const Layout: NextPage<LayoutProps> = (props: LayoutProps) => {
 
   return (
     <Wrapper>
-      {auth.user?.type === "Admin" ? <AdminMenu /> : <DepartmentMenu />}
+      <AdminMenu />
       <main>
         <Header />
-        {props.showBanner && <Banner title={props.title} subTitle={props.subTitle} />}
         <ChildWrapper>{loading.isLoading ? <div>로딩중입니다 ...</div> : props.children}</ChildWrapper>
       </main>
     </Wrapper>
   );
 };
 
-export const withLayout = (Page, { title, showBanner = true }) => {
+export const withLayout = Page => {
   return class extends Component<{ pageProps: any; data: any; getData: any }> {
     static async getInitialProps(ctx) {
       let pageProps = {};
@@ -67,7 +62,7 @@ export const withLayout = (Page, { title, showBanner = true }) => {
 
     render() {
       return (
-        <Layout title={title} subTitle={""} showBanner={showBanner}>
+        <Layout>
           <Page data={this.props.data} getData={this.props.getData} {...this.props.pageProps} />
         </Layout>
       );

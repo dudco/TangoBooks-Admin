@@ -2,7 +2,6 @@ import MenuItem from "./MenuItem";
 import styled from "styled-components";
 import Router from "next/router";
 import { useState } from "react";
-import { useAuth } from "../../utils/user-context";
 
 const Wrapper = styled.div`
   position: fixed;
@@ -36,14 +35,14 @@ const MenuWrapper = styled.div`
   top: 20%;
 `;
 
-const Top = ({ redUrl }) => {
+const Top = () => {
   return (
     <div
       onClick={() => {
-        Router.push(redUrl);
+        Router.push("/?q=r");
       }}
     >
-      <h1>한강사업본부</h1>
+      <h1>Tango Books</h1>
     </div>
   );
 };
@@ -57,34 +56,18 @@ export const AdminMenu = () => {
 
   return (
     <Wrapper>
-      <Top redUrl="/admin" />
+      <Top />
       <MenuWrapper>
-        <MenuItem link="/admin/department" title="부서 관리" />
-        <MenuItem link="/admin/employee" title="공공근로자 관리" />
-        <MenuItem link="/admin/employee/add" title="공공근로자 추가" />
-        <MenuItem link="/admin/salary" title="급여 관리" />
-        <MenuItem link="/admin/holidays" title="유급 휴일 관리" />
-        <MenuItem link="/resigner" title="퇴사자 관리" />
-      </MenuWrapper>
-    </Wrapper>
-  );
-};
-
-export const DepartmentMenu = () => {
-  const [show, setShow] = useState("none");
-  const onClick = n => e => {
-    if (show === n) setShow("none");
-    else setShow(n);
-  };
-
-  return (
-    <Wrapper>
-      <Top redUrl="/department/attendance" />
-      <MenuWrapper>
-        <MenuItem link="/department/employee" title="공공근로자 관리" />
-        <MenuItem link="/department/attendance" title="출근부" />
-        <MenuItem link="/department/pay" title="급여명세서" />
-        <MenuItem link="/resigner" title="퇴사자 관리" />
+        <MenuItem title="구독자">
+          <MenuItem link="/?q=t" title="임시회원" />
+          <MenuItem link="/?q=r" title="정회원" />
+        </MenuItem>
+        <MenuItem link="/publisher" title="출판사" />
+        <MenuItem link="/status" title="현황">
+          <MenuItem link="/status?q=t" title="시간별" />
+          <MenuItem link="/status?q=p" title="출판사별" />
+        </MenuItem>
+        <MenuItem link="/report" title="신고" />
       </MenuWrapper>
     </Wrapper>
   );
