@@ -1,6 +1,8 @@
-import { Dialog, DialogActions, Button, DialogContent, Table, TableCell, TableRow, TableHead, Paper, DialogTitle } from "@material-ui/core";
+import { Dialog, DialogActions, Button, DialogContent, Table, TableCell, TableRow, TableHead, Paper, DialogTitle, TableBody } from "@material-ui/core";
+import { BookModel } from "../../api/models/Book";
+import moment from "moment";
 
-const BooksDialog = (props: { handleClose: () => void; open: boolean }) => {
+const BooksDialog = (props: { handleClose: () => void; open: boolean; books: BookModel[] }) => {
   const { handleClose } = props;
   return (
     <Dialog onClose={handleClose} open={props.open}>
@@ -15,6 +17,17 @@ const BooksDialog = (props: { handleClose: () => void; open: boolean }) => {
               <TableCell>상태</TableCell>
             </TableRow>
           </TableHead>
+          <TableBody>
+            {props.books.map((book, idx) => (
+              <TableRow key={book._id}>
+                <TableCell>{idx + 1}</TableCell>
+                <TableCell>{book.name}</TableCell>
+                <TableCell>{book.user.length}</TableCell>
+                <TableCell>{moment(book.createdAt).format("YYYY-MM-DD")}</TableCell>
+                <TableCell>{book.active ? "활성화" : "정지"}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </DialogContent>
       <DialogActions>
