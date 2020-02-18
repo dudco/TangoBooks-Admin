@@ -4,6 +4,11 @@ import { useState } from "react";
 import moment from "moment";
 import { startOfWeek } from "date-fns";
 import * as dateFns from "date-fns";
+import AdminService from "../../api/services/AdminService";
+import { useAuth } from "../../utils/user-context";
+import { NextPageContext } from "next";
+import AdminModel from "../../api/models/Admin";
+import nextCookies from "next-cookies";
 
 const ToolsWrapper = styled.div`
   width: 100%;
@@ -113,8 +118,36 @@ const Calendar = styled.div`
   }
 `;
 
-const Holidays = () => {
+const Paid = styled.div`
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  bottom: 5%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const getAdminInfo = async token => {
+  try {
+    const res = await AdminService.get(token);
+    if (res.status === 200) {
+      return { data: res.data.data };
+    } else {
+      return { data: [] };
+    }
+  } catch (err) {
+    console.log(err.message);
+  }
+};
+
+const Holidays = (props: { adminInfo: AdminModel }) => {
+  const { user } = useAuth();
+
   const [currentMonth, setCurrentMonth] = useState(moment().toDate());
+  const [adminInfo, setAdminInfo] = useState(props.adminInfo);
 
   const onClickPrev = () => {
     setCurrentMonth(
@@ -132,10 +165,15 @@ const Holidays = () => {
     );
   };
 
-  const onClickDay = day => () => {
+  const onClickDay = day => async () => {
     // alert()
     if (confirm(`${moment(day).format("YYYY년 MM월 DD일")}을(를) 유급휴일로 지정하시겠습니까?`)) {
       console.log(day);
+      const res = await AdminService.add_holyday(user.token, { holyday: moment(day).format("YYYYMMDD") });
+      if (res.status === 200) {
+        setAdminInfo(res.data.data);
+        alert("저장되었습니다.");
+      }
     }
   };
 
@@ -168,6 +206,7 @@ const Holidays = () => {
           >
             <span className="number" onClick={onClickDay(day)}>
               {formattedDate}
+              {adminInfo.paid_holydays.includes(moment(day).format("YYYYMMDD")) && <Paid>유급휴일</Paid>}
             </span>
           </div>
         );
@@ -200,6 +239,14 @@ const Holidays = () => {
       </Calendar>
     </div>
   );
+};
+
+Holidays.getInitialProps = async (ctx: NextPageContext) => {
+  const { user } = nextCookies(ctx);
+  const { token } = JSON.parse(user);
+  const adminInfo = await getAdminInfo(token);
+
+  return { adminInfo: adminInfo.data };
 };
 
 export default withLayout(Holidays, { title: "유급 휴일 관리" });

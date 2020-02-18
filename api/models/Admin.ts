@@ -11,6 +11,7 @@ export default interface AdminModel extends UserModel {
   resident_tax: number;
   join_date: Date;
   leave_date: Date;
+  paid_holydays: string[];
 
   createAt: Date;
   updateAt: Date;
