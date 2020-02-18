@@ -167,12 +167,24 @@ const Holidays = (props: { adminInfo: AdminModel }) => {
 
   const onClickDay = day => async () => {
     // alert()
-    if (confirm(`${moment(day).format("YYYY년 MM월 DD일")}을(를) 유급휴일로 지정하시겠습니까?`)) {
-      console.log(day);
-      const res = await AdminService.add_holyday(user.token, { holyday: moment(day).format("YYYYMMDD") });
-      if (res.status === 200) {
-        setAdminInfo(res.data.data);
-        alert("저장되었습니다.");
+    if (props.adminInfo.paid_holydays.includes(moment(day).format("YYYYMMDD"))) {
+      // del
+      if (confirm(`${moment(day).format("YYYY년 MM월 DD일")}을(를) 유급휴일로 지정을 취소하시겠습니까?`)) {
+        const holydays = props.adminInfo.paid_holydays.filter(d => d !== moment(day).format("YYYYMMDD"));
+        const res = await AdminService.put(user.token, { paid_holydays: holydays });
+        if (res.status === 200) {
+          setAdminInfo(res.data.data);
+          alert("저장되었습니다.");
+        }
+      }
+    } else {
+      if (confirm(`${moment(day).format("YYYY년 MM월 DD일")}을(를) 유급휴일로 지정하시겠습니까?`)) {
+        console.log(day);
+        const res = await AdminService.add_holyday(user.token, { holyday: moment(day).format("YYYYMMDD") });
+        if (res.status === 200) {
+          setAdminInfo(res.data.data);
+          alert("저장되었습니다.");
+        }
       }
     }
   };
