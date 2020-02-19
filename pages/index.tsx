@@ -16,27 +16,40 @@ const Index = (props: { users: UserModel[] }) => {
   const router = useRouter();
 
   const [data, setData] = useState(
-    [...new Array(31)].reduce(
+    [...new Array(32)].reduce(
       (prevDay, _, day) => {
-        const d = [...new Array(13)].reduce(
-          (prevMonth, _, month) => {
-            if (month !== 12) {
-              const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
-              const users = props.users.filter(u => (router.query.q === "t" ? u.temp : !u.temp)).filter(u => moment(u.createdAt).format("YYYYMMDD") === date);
-              prevMonth.push(users.length);
-            } else {
-              prevMonth.push(
-                prevMonth.reduce((p, v, idx, arr) => {
-                  if (idx !== 0 && idx !== 12) return p + arr[idx];
-                  return p;
-                }, 0)
-              );
+        if (day === 31) {
+          const d = ["계"];
+          let sum = 0;
+          for (let j = 1; j <= 13; j++) {
+            sum = 0;
+            for (let i = 1; i <= 31; i++) {
+              sum += prevDay[i][j];
             }
-            return prevMonth;
-          },
-          [day + 1]
-        );
-        prevDay.push(d);
+            d.push(sum + "");
+          }
+          prevDay.push(d);
+        } else {
+          const d = [...new Array(13)].reduce(
+            (prevMonth, _, month) => {
+              if (month !== 12) {
+                const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
+                const users = props.users.filter(u => (router.query.q === "t" ? u.temp : !u.temp)).filter(u => moment(u.createdAt).format("YYYYMMDD") === date);
+                prevMonth.push(users.length);
+              } else {
+                const sum = prevMonth.reduce((p, v, idx) => {
+                  if (idx !== 0 && idx !== 12) return p + v;
+                  return p;
+                }, 0);
+                prevMonth.push(sum);
+              }
+              return prevMonth;
+            },
+            [day + 1]
+          );
+          prevDay.push(d);
+        }
+
         return prevDay;
       },
       [["", ...[...new Array(12)].map((_, idx) => idx + 1)]]
@@ -46,26 +59,42 @@ const Index = (props: { users: UserModel[] }) => {
   useEffect(() => {
     console.log(router.query.q);
     setData(
-      [...new Array(31)].reduce(
+      [...new Array(32)].reduce(
         (prevDay, _, day) => {
-          const d = [...new Array(12)].reduce(
-            (prevMonth, _, month) => {
-              if (month !== 12) {
-                const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
-                const users = props.users.filter(u => (router.query.q === "t" ? u.temp : !u.temp)).filter(u => moment(u.createdAt).format("YYYYMMDD") === date);
-                prevMonth.push(users.length);
+          if (day === 31) {
+            const d = ["계"];
+            let sum = 0;
+            for (let j = 1; j <= 13; j++) {
+              sum = 0;
+              for (let i = 1; i <= 31; i++) {
+                sum += prevDay[i][j];
               }
-              // else {
-              //   prevMonth.push(prevMonth.reduce((p, v, idx) => idx !== 0 && idx !== 12 && p + v, 0));
-              // }
-              return prevMonth;
-            },
-            [day + 1]
-          );
-          prevDay.push(d);
+              d.push(sum + "");
+            }
+            prevDay.push(d);
+          } else {
+            const d = [...new Array(13)].reduce(
+              (prevMonth, _, month) => {
+                if (month !== 12) {
+                  const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
+                  const users = props.users.filter(u => (router.query.q === "t" ? u.temp : !u.temp)).filter(u => moment(u.createdAt).format("YYYYMMDD") === date);
+                  prevMonth.push(users.length);
+                } else {
+                  const sum = prevMonth.reduce((p, v, idx) => {
+                    if (idx !== 0 && idx !== 12) return p + v;
+                    return p;
+                  }, 0);
+                  prevMonth.push(sum);
+                }
+                return prevMonth;
+              },
+              [day + 1]
+            );
+            prevDay.push(d);
+          }
           return prevDay;
         },
-        [["", ...[...new Array(12)].map((_, idx) => idx + 1)]]
+        [["", ...[...new Array(12)].map((_, idx) => idx + 1), "계"]]
       )
     );
   }, [router.query.q]);
