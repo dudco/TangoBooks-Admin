@@ -105,9 +105,7 @@ const Login = () => {
       </Filter>
       <Title>
         <div className="line" />
-        서울특별시 한강사업본수
-        <br />
-        공공근로자 급여관리 프로그램
+	Be digital with books
       </Title>
       <Form>
         <input name="id" type="text" value={id} onChange={e => setId(e.target.value)} placeholder="ID" />
