@@ -1,4 +1,5 @@
 import { UserModel } from "./User";
+import { HistoryModel } from "./History";
 
 export interface BookModel {
   _id: string;
@@ -15,4 +16,5 @@ export interface BookModel {
   ];
   user: UserModel[];
   createdAt: Date;
+  historys: HistoryModel[];
 }

@@ -8,4 +8,7 @@ export interface HistoryModel {
   code: string;
   coin?: number;
   report: ReportModel;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
