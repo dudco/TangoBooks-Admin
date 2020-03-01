@@ -119,6 +119,7 @@ const Status = (props: { publishers: PublisherModel[] }) => {
   };
 
   useEffect(() => {
+    console.log(router.query.q);
     updateData();
   }, [router.query.q]);
 
@@ -134,7 +135,7 @@ const Status = (props: { publishers: PublisherModel[] }) => {
     <Wrapper>
       <Title>{router.query.q === "t" ? "시간별 현황" : "출판사별 현황"}</Title>
 
-      {router.query.q === "t" ? (
+      {router.query.q === "t" && data[0] instanceof Array ? (
         <>
           <Divider style={{ margin: "10px 0" }} />
           <Table>
