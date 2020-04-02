@@ -68,10 +68,15 @@ const Index = (props: { tempList; paymentList; users }) => {
             <Cell>{moment().format("YYYY")}</Cell>
           </Row>
 
-          {data.map((row, cIdx) => (
+          {data.map((row, cIdx, cArr) => (
             <Row key={cIdx}>
-              {row.map((v, rIdx) => (
-                <Cell key={`${rIdx}-${cIdx}`}>{v}</Cell>
+              {row.map((v, rIdx, rArr) => (
+                <Cell
+                  key={`${rIdx}-${cIdx}`}
+                  style={{ cursor: router.query.q === "r" && rIdx !== 0 && cIdx !== 0 && rIdx !== rArr.length - 1 && cIdx !== cArr.length - 1 ? "pointer" : "" }}
+                >
+                  {v}
+                </Cell>
               ))}
             </Row>
           ))}
