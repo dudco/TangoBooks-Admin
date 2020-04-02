@@ -4,7 +4,8 @@ class PaymentService extends Api {
   private base = "payment";
 
   public get = () => this.api.get(`/${this.base}/`);
-  public getById = id => this.api.get(`/${this.base}/${id}`);
+  public getByDate = date => this.api.get(`/${this.base}`, { params: { date } });
+  public put = (id, data) => this.api.put(`/${this.base}/${id}`, data);
 }
 
 export default PaymentService.instance as PaymentService;

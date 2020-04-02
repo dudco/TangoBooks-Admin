@@ -1,16 +1,16 @@
-import { withLayout } from "../components/Layout";
 import Title from "../components/Title";
 import { Table, Row, Cell } from "../components/Table";
 import { useRouter } from "next/router";
 import styled from "styled-components";
-import { NextPageContext } from "next";
 import { Divider, TextField, Button } from "@material-ui/core";
-import AuthService from "../api/services/AuthService";
 import { useState, useEffect } from "react";
-import { UserModel } from "../api/models/User";
 import moment from "moment";
 import SearchResultDialog from "../components/Dialog/SearchResultDialog";
+import PaymentDialog from "../components/Dialog/PaymentDialog";
+import { withLayout } from "../components/Layout";
 import PaymentService from "../api/services/PaymentService";
+import { NextPageContext } from "next";
+import AuthService from "../api/services/AuthService";
 import { PaymentModel } from "../api/models/Payment";
 
 const Wrapper = styled.div`
@@ -35,9 +35,15 @@ const Index = (props: { tempList; paymentList; users }) => {
     setData(router.query.q === "t" ? props.tempList : props.paymentList);
   }, [router.query.q]);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState("");
   const [targetUser, setTargetUser] = useState(undefined);
+  const [targetDate, setTargetDate] = useState("");
   const [search, setSearch] = useState("");
+
+  const onClickPayment = (yyyy, mm, dd) => () => {
+    setTargetDate(`${yyyy}${mm > 9 ? mm : `0${mm}`}${dd > 9 ? dd : `0${dd}`}`);
+    setOpen("Payment");
+  };
 
   return (
     <>
@@ -53,7 +59,7 @@ const Index = (props: { tempList; paymentList; users }) => {
                 onClick={() => {
                   const user = props.users.find(u => u.hash === search);
                   setTargetUser(user);
-                  setOpen(true);
+                  setOpen("Search");
                 }}
               >
                 검색
@@ -74,6 +80,11 @@ const Index = (props: { tempList; paymentList; users }) => {
                 <Cell
                   key={`${rIdx}-${cIdx}`}
                   style={{ cursor: router.query.q === "r" && rIdx !== 0 && cIdx !== 0 && rIdx !== rArr.length - 1 && cIdx !== cArr.length - 1 ? "pointer" : "" }}
+                  onClick={
+                    router.query.q === "r" && rIdx !== 0 && cIdx !== 0 && rIdx !== rArr.length - 1 && cIdx !== cArr.length - 1
+                      ? onClickPayment(moment().format("YYYY"), rIdx, cIdx)
+                      : undefined
+                  }
                 >
                   {v}
                 </Cell>
@@ -82,7 +93,8 @@ const Index = (props: { tempList; paymentList; users }) => {
           ))}
         </Table>
       </Wrapper>
-      <SearchResultDialog open={open} handleClose={() => setOpen(false)} user={targetUser} />
+      <SearchResultDialog open={open === "Search"} handleClose={() => setOpen("")} user={targetUser} />
+      <PaymentDialog open={open === "Payment"} handleClose={() => setOpen("")} date={targetDate} />
     </>
   );
 };
