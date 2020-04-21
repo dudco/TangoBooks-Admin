@@ -8,6 +8,7 @@ export interface PaymentModel {
   check: Boolean; // 확인
   usage: string; // 용도
   tool: string; // 수단
+  done: boolean;
 
   createdAt: Date;
   updatedAt: Date;

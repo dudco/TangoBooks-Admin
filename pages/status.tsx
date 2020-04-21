@@ -33,17 +33,18 @@ const Wrapper = styled.div`
 `;
 const Status = (props: { publishers: PublisherModel[] }) => {
   const router = useRouter();
-  const [select, setSelect] = useState(moment().format("M"));
+  const [select, setSelect] = useState(moment().format("MM"));
+  const [year, setYear] = useState(moment().format("YYYY"));
   const [rowData, setRowData] = useState([]);
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const historys = props.publishers.reduce((prev, publisher) => {
       const data = publisher.book.reduce((p, b) => {
-        const inner = b.historys.map(history => ({
+        const inner = b.historys.map((history) => ({
           date: history.createdAt,
           coin: history.coin,
-          publisher: publisher.author
+          publisher: publisher.author,
         }));
         return p.concat(inner);
       }, []);
@@ -55,7 +56,7 @@ const Status = (props: { publishers: PublisherModel[] }) => {
 
   useEffect(() => {
     updateData();
-  }, [rowData]);
+  }, [rowData, year]);
 
   const updateData = () => {
     let data;
@@ -79,10 +80,10 @@ const Status = (props: { publishers: PublisherModel[] }) => {
             const d = [...new Array(13)].reduce(
               (prevMonth, _, month) => {
                 if (month !== 12) {
-                  const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
+                  const date = `${year}${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
                   // const users = props.users.filter(u => (router.query.q === "t" ? u.temp : !u.temp)).filter(u => moment(u.createdAt).format("YYYYMMDD") === date);
                   // prevMonth.push(users.length);
-                  prevMonth.push(rowData.filter(r => moment(r.date).format("YYYYMMDD") === date).reduce((p, r) => p + r.coin, 0));
+                  prevMonth.push(rowData.filter((r) => moment(r.date).format("YYYYMMDD") === date).reduce((p, r) => p + r.coin, 0));
                 } else {
                   const sum = prevMonth.reduce((p, v, idx) => {
                     if (idx !== 0 && idx !== 12) return p + v;
@@ -101,10 +102,11 @@ const Status = (props: { publishers: PublisherModel[] }) => {
         [["", ...[...new Array(12)].map((_, idx) => idx + 1), "계"]]
       );
     } else {
+      console.log("row", rowData);
       data = rowData
-        .filter(d => moment(d.date).format("M") === select)
+        .filter((d) => moment(d.date).format("MM") === select && moment(d.date).format("YYYY") === year)
         .reduce((p, d) => {
-          const idx = p.findIndex(a => a.name === d.name);
+          const idx = p.findIndex((a) => a.publisher === d.publisher);
 
           if (idx > -1) {
             p[idx].coin += d.coin;
@@ -114,12 +116,19 @@ const Status = (props: { publishers: PublisherModel[] }) => {
 
           return p;
         }, []);
+      console.log("aa", data);
     }
     setData(data);
   };
 
+  function onClickNextYear() {
+    setYear(moment(year).add(1, "year").format("YYYY"));
+  }
+  function onClickPrevYear() {
+    setYear(moment(year).add(-1, "year").format("YYYY"));
+  }
+
   useEffect(() => {
-    console.log(router.query.q);
     updateData();
   }, [router.query.q]);
 
@@ -127,7 +136,7 @@ const Status = (props: { publishers: PublisherModel[] }) => {
     updateData();
   }, [select]);
 
-  const onClickMonth = num => () => {
+  const onClickMonth = (num) => () => {
     setSelect(num);
   };
 
@@ -138,6 +147,15 @@ const Status = (props: { publishers: PublisherModel[] }) => {
       {router.query.q === "t" && data[0] instanceof Array ? (
         <>
           <Divider style={{ margin: "10px 0" }} />
+          <div className="date-year">
+            <span onClick={onClickPrevYear} style={{ cursor: "pointer" }}>
+              ◀︎
+            </span>
+            <span>{year}년</span>
+            <span onClick={onClickNextYear} style={{ cursor: "pointer" }}>
+              ▶︎
+            </span>
+          </div>
           <Table>
             {data.map((row, cIdx) => (
               <Row key={cIdx}>
@@ -150,33 +168,41 @@ const Status = (props: { publishers: PublisherModel[] }) => {
         </>
       ) : (
         <>
-          <div className="date-year">{moment().format("YYYY")}년</div>
+          <div className="date-year">
+            <span onClick={onClickPrevYear} style={{ cursor: "pointer" }}>
+              ◀︎
+            </span>
+            <span>{year}년</span>
+            <span onClick={onClickNextYear} style={{ cursor: "pointer" }}>
+              ▶︎
+            </span>
+          </div>
           <div className="date-month-pick">
-            <span className={select === "1" ? "select" : ""} onClick={onClickMonth("1")}>
+            <span className={select === "01" ? "select" : ""} onClick={onClickMonth("01")}>
               1
             </span>
-            <span className={select === "2" ? "select" : ""} onClick={onClickMonth("2")}>
+            <span className={select === "02" ? "select" : ""} onClick={onClickMonth("02")}>
               2
             </span>
-            <span className={select === "3" ? "select" : ""} onClick={onClickMonth("3")}>
+            <span className={select === "03" ? "select" : ""} onClick={onClickMonth("03")}>
               3
             </span>
-            <span className={select === "4" ? "select" : ""} onClick={onClickMonth("4")}>
+            <span className={select === "04" ? "select" : ""} onClick={onClickMonth("04")}>
               4
             </span>
-            <span className={select === "5" ? "select" : ""} onClick={onClickMonth("5")}>
+            <span className={select === "05" ? "select" : ""} onClick={onClickMonth("05")}>
               5
             </span>
-            <span className={select === "6" ? "select" : ""} onClick={onClickMonth("6")}>
+            <span className={select === "06" ? "select" : ""} onClick={onClickMonth("06")}>
               6
             </span>
-            <span className={select === "7" ? "select" : ""} onClick={onClickMonth("7")}>
+            <span className={select === "07" ? "select" : ""} onClick={onClickMonth("07")}>
               7
             </span>
-            <span className={select === "8" ? "select" : ""} onClick={onClickMonth("8")}>
+            <span className={select === "08" ? "select" : ""} onClick={onClickMonth("08")}>
               8
             </span>
-            <span className={select === "9" ? "select" : ""} onClick={onClickMonth("9")}>
+            <span className={select === "09" ? "select" : ""} onClick={onClickMonth("09")}>
               9
             </span>
             <span className={select === "10" ? "select" : ""} onClick={onClickMonth("10")}>

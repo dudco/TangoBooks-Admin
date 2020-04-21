@@ -29,7 +29,7 @@ const SearchResultDialog = (props: { handleClose: () => void; open: boolean; use
           <Wrapper>
             <div>
               <span>회원</span>
-              <span>{user.user_id}</span>
+              <span>{user.hash}</span>
             </div>
             <div>
               <span>가입일</span>

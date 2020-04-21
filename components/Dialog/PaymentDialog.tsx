@@ -32,18 +32,18 @@ const PaymenttDialog = (props: { handleClose: () => void; open: boolean; date?: 
     } else {
       console.log(props.date);
       PaymentService.getByDate(props.date)
-        .then(res => {
+        .then((res) => {
           console.log(res.data.data);
           setData(res.data.data);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
           setData([]);
         });
     }
   }, [props.open, props.date]);
 
-  const onClickConfirm = idx => async () => {
+  const onClickConfirm1 = (idx) => async () => {
     if (data[idx].check) {
       alert("이미 확인되었습니다.");
     } else {
@@ -54,7 +54,28 @@ const PaymenttDialog = (props: { handleClose: () => void; open: boolean; date?: 
         if (idx === tIdx) {
           return {
             ...d,
-            check: true
+            check: true,
+          };
+        } else {
+          return d;
+        }
+      });
+
+      setData(newData);
+    }
+  };
+  const onClickConfirm2 = (idx) => async () => {
+    if (data[idx].done) {
+      alert("이미 확인되었습니다.");
+    } else {
+      await PaymentService.put(data[idx]._id, { done: true });
+      alert("업데이트 되었습니다.");
+
+      const newData = data.map((d, tIdx) => {
+        if (idx === tIdx) {
+          return {
+            ...d,
+            done: true,
           };
         } else {
           return d;
@@ -87,15 +108,17 @@ const PaymenttDialog = (props: { handleClose: () => void; open: boolean; date?: 
                 {data.map((d, idx) => (
                   <TableRow>
                     <TableCell>{idx + 1}</TableCell>
-                    <TableCell>{d.user.hash}</TableCell>
+                    <TableCell>{d.user.hash || "none"}</TableCell>
                     <TableCell>{d.name}</TableCell>
                     <TableCell>{d.bank}</TableCell>
-                    <TableCell onClick={onClickConfirm(idx)} style={{ color: d.check ? "black" : "blue", cursor: d.check ? "" : "pointer" }}>
+                    <TableCell onClick={onClickConfirm1(idx)} style={{ color: d.check ? "black" : "blue", cursor: d.check ? "" : "pointer" }}>
                       {d.check ? "완료" : "확인"}
                     </TableCell>
                     <TableCell>{d.tool}</TableCell>
                     <TableCell>{d.usage}</TableCell>
-                    <TableCell style={{ color: d.check ? "black" : "blue" }}>{d.check ? "완료" : "확인"}</TableCell>
+                    <TableCell onClick={onClickConfirm2(idx)} style={{ color: d.done ? "black" : "blue", cursor: d.done ? "" : "pointer" }}>
+                      {d.done ? "완료" : "확인"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
