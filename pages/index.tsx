@@ -39,12 +39,24 @@ const Index = (props: { tempList; paymentList; users }) => {
   const [targetUser, setTargetUser] = useState(undefined);
   const [targetDate, setTargetDate] = useState("");
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState(props.users);
 
   const onClickPayment = (yyyy, mm, dd) => () => {
     setTargetDate(`${yyyy}${mm > 9 ? mm : `0${mm}`}${dd > 9 ? dd : `0${dd}`}`);
     setOpen("Payment");
   };
 
+  const onClickRefund = (id) => async (e) => {
+    try {
+      const res = await AuthService.refundUser(id);
+      // setUser(res.data.data);
+      setTargetUser(res.data.data);
+      const authRes = await AuthService.getUsers();
+      setUsers(authRes.data.data);
+    } catch (err) {
+      alert("오류 발생.");
+    }
+  };
   return (
     <>
       <Wrapper>
@@ -52,12 +64,12 @@ const Index = (props: { tempList; paymentList; users }) => {
           <Title>{router.query.q === "t" ? "임시회원" : "정회원"}</Title>
           {router.query.q !== "t" && (
             <>
-              <TextField label="검색" value={search} onChange={e => setSearch(e.target.value)} />
+              <TextField label="검색" value={search} onChange={(e) => setSearch(e.target.value)} />
               <Button
                 variant="contained"
                 style={{ marginLeft: 16 }}
                 onClick={() => {
-                  const user = props.users.find(u => u.hash === search);
+                  const user = users.find((u) => u.hash === search);
                   setTargetUser(user);
                   setOpen("Search");
                 }}
@@ -93,13 +105,13 @@ const Index = (props: { tempList; paymentList; users }) => {
           ))}
         </Table>
       </Wrapper>
-      <SearchResultDialog open={open === "Search"} handleClose={() => setOpen("")} user={targetUser} />
+      <SearchResultDialog open={open === "Search"} handleClose={() => setOpen("")} onClickRefund={onClickRefund} user={targetUser} />
       <PaymentDialog open={open === "Payment"} handleClose={() => setOpen("")} date={targetDate} />
     </>
   );
 };
 
-const genTempCalendar = datas => {
+const genTempCalendar = (datas) => {
   const tempCalendarReducer = (prevDay, _, day) => {
     if (day === 31) {
       const d = ["계"];
@@ -117,7 +129,7 @@ const genTempCalendar = datas => {
         (prevMonth, _, month) => {
           if (month !== 12) {
             const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
-            const users = datas.filter(u => u.temp).filter(u => moment(u.createdAt).format("YYYYMMDD") === date);
+            const users = datas.filter((u) => u.temp).filter((u) => moment(u.createdAt).format("YYYYMMDD") === date);
             prevMonth.push(users.length);
           } else {
             const sum = prevMonth.reduce((p, v, idx) => {
@@ -156,7 +168,7 @@ const genPaymentCalendar = (datas: PaymentModel[]) => {
         (prevMonth, _, month) => {
           if (month !== 12) {
             const date = `2020${month + 1 < 10 ? `0${month + 1}` : month + 1}${day + 1 < 10 ? `0${day + 1}` : day + 1}`;
-            const payments = datas.filter(p => moment(p.createdAt).format("YYYYMMDD") === date);
+            const payments = datas.filter((p) => moment(p.createdAt).format("YYYYMMDD") === date);
             prevMonth.push(payments.length);
           } else {
             const sum = prevMonth.reduce((p, v, idx) => {

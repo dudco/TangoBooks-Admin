@@ -1,6 +1,7 @@
 import { BookModel } from "./Book";
 
 export interface UserModel {
+  _id: string;
   user_id: string;
   user_pw?: string;
   library?: BookModel[];
@@ -13,5 +14,7 @@ export interface UserModel {
   validatePassword: (user_pw: string) => boolean;
   admin: boolean;
   done: false;
+  refund: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
